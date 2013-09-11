@@ -1,0 +1,130 @@
+-- Subsystems of the Blunderjack system
+package BJSubsystems
+public
+  -- It provides hardware abstraction by providing an interface above the 
+  -- Actuator hardware. All other subcomponents interact with actuators through 
+  -- it.
+  process ActuatorInterface
+    features
+      DataToInterface: port group Types::DeviceIn;
+      CommandToActuator: port group Types::ActuatorOut;
+    flows
+      flow_cmd: flow path DataToInterface -> CommandToActuator {
+        Latency => 15 Ms;
+        };
+    --TODO: add resource budgets
+    properties
+      SEI::Partition_Latency => 50 Ms;
+      SEI::Is_Partition => true;
+  end ActuatorInterface;
+  
+  -- The component to interface with the control panel both to take the input 
+  -- from the operator and to display information
+  process ControlPanelInterface
+    features
+      ControlPanelCmdToInterface: port group Types::PanelControlsIn;
+      InterfaceCmdOut: port group Types::DeviceOut;
+      ControlPanelSigToInterface: port group Types::PanelSignalsOut;
+      InterfaceSigIn: port group Types::DeviceIn;
+    flows
+      flow_signal: flow path InterfaceSigIn -> ControlPanelSigToInterface {
+        Latency => 5 Ms;
+        };
+      flow_cmd: flow path ControlPanelCmdToInterface -> InterfaceCmdOut {
+        Latency => 15 Ms;
+        };
+    --TODO: add resource budgets
+    properties
+      SEI::Partition_Latency => 50 Ms;
+      SEI::Is_Partition => true;
+  end ControlPanelInterface;
+  
+  -- It provides an interface to the sensor devices and any components 
+  -- interested in sensor input uses it. 
+  process SensorInterface
+    features
+      SensorToInterface: port group Types::SensorIn;
+      InterfaceOut: port group Types::DeviceOut;
+    flows
+      flow1: flow path SensorToInterface -> InterfaceOut {
+        Latency => 15 Ms;
+        };
+    --TODO: add resource budgets
+    properties
+      SEI::Partition_Latency => 50 Ms;
+      SEI::Is_Partition => true;
+  end SensorInterface;
+  
+  -- Implements the safety policy and logic to make decisions and ensure 
+  -- safety of the operator.
+  process BJSafetyDirector
+    features
+      weight_in: in event data port;
+      rotation_in: in event data port;
+      cmd_in: in event data port;
+      act_out: out data port;
+      sig_out: port group Types::DeviceOut;
+    flows
+      flow_weight: flow path weight_in -> sig_out {
+        Latency => 20 Ms;
+        };
+      flow_cmd_act: flow path cmd_in -> act_out {
+        Latency => 50 Ms;
+        };
+      flow_cmd_sig: flow path cmd_in -> sig_out {
+        Latency => 50 Ms;
+        };
+    --TODO: add resource budgets
+    properties
+      SEI::Partition_Latency => 50 Ms;
+      SEI::Is_Partition => true;
+  end BJSafetyDirector;
+  
+  -- Listens to and maintains the last known state of devices (sensors and 
+  -- actuators). Components can subscribe to it expressing interest in type of 
+  -- events that they should be notified of.
+  process EventManager
+    features
+      device_data: port group Types::DeviceIn;
+      weight: out event data port;
+      rotation: out event data port;
+      cmd: out event data port;
+    flows
+      flow_weight: flow path device_data -> weight {
+        Latency => 5 Ms;
+        };
+      flow_cmd: flow path device_data -> cmd {
+        Latency => 10 Ms;
+        };
+    --TODO: add resource budgets
+    properties
+      SEI::Partition_Latency => 50 Ms;
+      SEI::Is_Partition => true;
+  end EventManager;
+  
+  -- A highlevel abstraction to enable logical commands for Actuators. e.g. 
+  -- actuator.arm_motion(rotate, 90 degrees, counterclockwise). It will 
+  -- internally use low level ActuatorInterface to implement these commands.
+  process ControlActuators
+    features
+      cmd_in: in data port;
+      cmd_out: port group Types::DeviceOut;
+    flows
+      flow_act: flow path cmd_in -> cmd_out {
+        Latency => 15 Ms;
+        };
+    --TODO: add resource budgets
+    properties
+      SEI::Partition_Latency => 50 Ms;
+      SEI::Is_Partition => true;
+  end ControlActuators;
+  
+  -- To ensure that the I/O devices are all funtioning properly, it ensures 
+  -- that the device functioning reliably  
+  process DeviceSurveilence
+    --TODO: add resource budgets  
+    properties
+      SEI::Partition_Latency => 50 Ms;
+      SEI::Is_Partition => true;
+  end DeviceSurveilence;
+end BJSubsystems;

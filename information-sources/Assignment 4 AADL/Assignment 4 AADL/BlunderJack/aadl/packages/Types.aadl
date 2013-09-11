@@ -1,0 +1,86 @@
+package Types
+public
+  port group SensorOut
+    features
+      id: out data port Sensor_ID;
+      reading: out data port Sensor_Data;
+  end SensorOut;
+  
+  port group SensorIn
+    inverse of SensorOut
+  end SensorIn;
+  
+  port group DeviceOut
+    features
+      dev_type: out data port Device_Type;
+      payload: out data port Device_Data;
+  end DeviceOut;
+  
+  port group DeviceIn
+    inverse of DeviceOut
+  end DeviceIn;
+  
+  port group ActuatorOut
+    features
+      id: out data port Actuator_ID;
+      cmd: out data port Actuator_CMD;
+      payload: out data port Actuator_Payload;
+  end ActuatorOut;
+  
+  port group ActuatorIn
+    inverse of ActuatorOut
+  end ActuatorIn;
+  
+  port group PanelControlsOut
+    features
+      id: out data port Control_ID;
+      payload: out data port Control_Payload;
+  end PanelControlsOut;
+  
+  port group PanelControlsIn
+    inverse of PanelControlsOut
+  end PanelControlsIn;
+  
+  port group PanelSignalsIn
+    features
+      id: in data port Signal_ID;
+      payload: in data port Signal_Payload;
+  end PanelSignalsIn;
+  
+  port group PanelSignalsOut
+    inverse of PanelSignalsIn
+  end PanelSignalsOut;
+  
+  data Sensor_ID
+  end Sensor_ID;
+  
+  data Sensor_Data
+  end Sensor_Data;
+  
+  data Device_Type
+  end Device_Type;
+  
+  data Device_Data
+  end Device_Data;
+  
+  data Actuator_ID
+  end Actuator_ID;
+  
+  data Actuator_CMD
+  end Actuator_CMD;
+  
+  data Actuator_Payload
+  end Actuator_Payload;
+  
+  data Control_ID
+  end Control_ID;
+  
+  data Control_Payload
+  end Control_Payload;
+  
+  data Signal_ID
+  end Signal_ID;
+  
+  data Signal_Payload
+  end Signal_Payload;
+end Types;

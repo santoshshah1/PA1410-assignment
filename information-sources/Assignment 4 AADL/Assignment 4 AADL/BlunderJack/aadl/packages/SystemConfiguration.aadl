@@ -1,0 +1,36 @@
+package SystemConfigurations
+public
+  system mysystem
+  end mysystem;
+  
+  system implementation mysystem.BJCCSys
+    subcomponents
+      Platform: system HardwarePlatform::ComputingPlatform.Config3;
+      DeviceManagement: system BJSystem::DeviceManager.Impl;
+      SafetyControlManagement: system BJSystem::SafetyManager.Impl;
+      PilotDisplay: device HardwareParts::ControlPanel;
+      weight_sensor: device HardwareParts::Sensors;
+      control_panel: device HardwareParts::ControlPanel;
+      feeder: device HardwareParts::Actuators;
+    connections
+      BusAccessConnection1: bus access Platform.BusAccess1 -> DeviceManagement.BusAccess1;
+      BusAccessConnection2: bus access Platform.BusAccess1 -> SafetyControlManagement.BusAccess1;
+      C01: port group weight_sensor.data_out -> DeviceManagement.sensor_in;
+      C02: port group DeviceManagement.device_out -> SafetyControlManagement.device_in;
+      C03: port group SafetyControlManagement.device_out -> DeviceManagement.device_in;
+      C04: port group DeviceManagement.controlsig_out -> control_panel.signal;
+      C05: port group control_panel.control -> DeviceManagement.controlcmd_in;
+      C06: port group DeviceManagement.actuator_out -> feeder.cmd;
+    --TODO: Flow Latency analysis: add system level flows here to evaluate the scenarios 1 and 2
+    properties 
+      -- TODO: Resource allocation analysis: complete/change/add the mapping of 
+      -- processes to hardware elements depending on the processing and memory 
+      -- budgets.
+      Actual_Processor_Binding =>  reference platform.processor1 applies to DeviceManagement.ActuInterf;
+      Actual_Processor_Binding =>  reference platform.processor1 applies to SafetyControlManagement.CActuators;
+      Actual_Memory_Binding =>  reference platform.processor2.membank2 applies to DeviceManagement.CtrlPanelInterf;
+      Actual_Memory_Binding =>  reference platform.processor2.membank2 applies to DeviceManagement.SenInterf;
+      Actual_Memory_Binding =>  reference platform.processor1.membank1 applies to DeviceManagement.ActuInterf;
+      Actual_Memory_Binding =>  reference platform.processor1.membank2 applies to SafetyControlManagement.CActuators;
+  end mysystem.BJCCSys;
+end SystemConfigurations;

@@ -1,0 +1,92 @@
+package HardwareParts
+public
+  memory RAM
+    properties
+      Word_Count => 128000;
+      SEI::RAMCapacity => 1024.0 KB;
+  end RAM;
+  
+  memory ROM
+    properties
+      Word_Count => 256;
+      SEI::ROMCapacity => 100.0 KB;
+  end ROM;
+  
+  -- Advanced High-performance Bus (AHB)
+  bus AHB
+    properties
+      SEI::PowerCapacity => 350.0 mW;
+      SEI::BandWidthCapacity => 100.0 Mbps;
+  end AHB;
+  
+  processor ARM
+    features
+      ahb: requires bus access AHB {
+        SEI::PowerBudget => access 75.0 mW;
+        };
+  end ARM;
+  
+  processor implementation ARM.solo
+    subcomponents
+      MemBank1: memory RAM;
+      MemBank2: memory RAM;
+      MembankROM: memory ROM;
+    properties
+      SEI::cycle_time => 1000 ps;
+      SEI::MIPSCapacity => 1000.0 MIPS;
+  end ARM.solo;
+  
+  processor implementation ARM.dual
+    subcomponents
+      MemBank1: memory RAM;
+      MembankROM: memory ROM;
+    modes none ;
+    properties
+      SEI::cycle_time => 500 ps;
+      SEI::MIPSCapacity => 2000.0 MIPS;
+  end ARM.dual;
+  
+  processor implementation ARM.hybrid
+    subcomponents
+      MemBank1: memory RAM;
+      MemBank2: memory RAM;
+      MembankROM: memory ROM;
+    properties
+      SEI::cycle_time => 666 ps;
+      SEI::MIPSCapacity => 1500.0 MIPS;
+  end ARM.hybrid;
+  
+  device ControlPanel
+    features
+      ahb: requires bus access AHB;
+      control: port group Types::PanelControlsOut;
+      signal: port group Types::PanelSignalsIn;
+    flows
+      signal_flow: flow sink signal {
+        Latency => 10 Ms;
+        };
+      cmd_flow: flow source control {
+        Latency => 30 Ms;
+        };
+  end ControlPanel;
+  
+  device Actuators
+    features
+      cmd: port group Types::ActuatorIn;
+      ahb: requires bus access AHB;
+    flows
+      flow1: flow sink cmd {
+        Latency => 50 Ms;
+        };
+  end Actuators;
+  
+  device Sensors
+    features
+      data_out: port group Types::SensorOut;
+      ahb: requires bus access AHB;
+    flows
+      flow1: flow source data_out {
+        Latency => 10 Ms;
+        };
+  end Sensors;
+end HardwareParts;

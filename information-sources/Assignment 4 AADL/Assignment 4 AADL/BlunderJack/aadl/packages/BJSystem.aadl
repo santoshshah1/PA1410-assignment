@@ -1,0 +1,91 @@
+package BJSystem
+public
+  -- Blunderjack system "BJCCSystem" has two main subsystems: DeviceManager and 
+  -- SafetyManager. DeviceManager is more of a hardware abstraction layer that 
+  -- interfaces with the hardware and masks hardware specific details to other 
+  -- subsystems. SafetyManager has domain logic and application components that
+  -- are hardware independent.
+  system BJCCSystem
+    features
+      BusAccess1: requires bus access HardwareParts::AHB;
+    properties
+      SEI::reference_processor => processor HardwareParts::ARM.solo;
+  end BJCCSystem;
+  
+  system DeviceManager
+    extends BJCCSystem
+    features
+      sensor_in: port group Types::SensorIn;
+      device_in: port group Types::DeviceIn;
+      device_out: port group Types::DeviceOut;
+      actuator_out: port group Types::ActuatorOut;
+      controlcmd_in: port group Types::PanelControlsIn;
+      controlsig_out: port group Types::PanelSignalsOut;
+    flows
+      sensor_inout_flow: flow path sensor_in -> device_out;
+      signal_inout_flow: flow path device_in -> controlsig_out;
+      cmd_inout_flow: flow path controlcmd_in -> device_out;
+      actuator_inout_flow: flow path device_in -> actuator_out;
+  end DeviceManager;
+  
+  system implementation DeviceManager.Impl
+    subcomponents
+      ActuInterf: process BJSubsystems::ActuatorInterface;
+      CtrlPanelInterf: process BJSubsystems::ControlPanelInterface;
+      SenInterf: process BJSubsystems::SensorInterface;
+    connections
+      C01: port group sensor_in -> SenInterf.SensorToInterface {
+        SEI::BandWidthBudget => 1.0 Mbps;
+        };
+      C02: port group SenInterf.InterfaceOut -> device_out {
+        SEI::BandWidthBudget => 5.0 Mbps;
+        };
+      C03: port group device_in -> ActuInterf.DataToInterface {
+        SEI::BandWidthBudget => 5.0 Mbps;
+        };
+      C04: port group ActuInterf.CommandToActuator -> actuator_out {
+        SEI::BandWidthBudget => 1.0 Mbps;
+        };
+      C05: port group controlcmd_in -> CtrlPanelInterf.ControlPanelCmdToInterface {
+        SEI::BandWidthBudget => 7.0 Mbps;
+        };
+      C06: port group CtrlPanelInterf.InterfaceCmdOut -> device_out {
+        SEI::BandWidthBudget => 10.0 Mbps;
+        };
+      C07: port group CtrlPanelInterf.ControlPanelSigToInterface -> controlsig_out {
+        SEI::BandWidthBudget => 5.0 Mbps;
+        };
+      C08: port group device_in -> CtrlPanelInterf.InterfaceSigIn {
+        SEI::BandWidthBudget => 7.0 Mbps;
+        };
+    --TODO: add subsystem level flows
+  end DeviceManager.Impl;
+  
+  system SafetyManager
+    extends BJCCSystem
+    features
+      device_in: port group Types::DeviceIn;
+      device_out: port group Types::DeviceOut;
+    flows
+      weight_inout_flow: flow path device_in -> device_out;
+      cmd_act_flow: flow path device_in -> device_out;
+      cmd_sig_flow: flow path device_in -> device_out;
+  end SafetyManager;
+  
+  system implementation SafetyManager.Impl
+    subcomponents
+      EventMgr: process BJSubsystems::EventManager;
+      CActuators: process BJSubsystems::ControlActuators;
+      DevSurveilence: process BJSubsystems::DeviceSurveilence;
+      SafetyDirector: process BJSubsystems::BJSafetyDirector;
+    connections
+      C01: port group device_in -> EventMgr.device_data;
+      C02: event data port EventMgr.weight -> SafetyDirector.weight_in;
+      C03: event data port EventMgr.rotation -> SafetyDirector.rotation_in;
+      C04: event data port EventMgr.cmd -> SafetyDirector.cmd_in;
+      C05: data port SafetyDirector.act_out -> CActuators.cmd_in;
+      C06: port group SafetyDirector.sig_out -> device_out;
+      C07: port group CActuators.cmd_out -> device_out;
+    --TODO: add subsystem level flows
+  end SafetyManager.Impl;
+end BJSystem;

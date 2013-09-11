@@ -1,0 +1,39 @@
+package HardwarePlatform
+public
+  system ComputingPlatform
+    features
+      BusAccess1: provides bus access HardwareParts::AHB;
+  end ComputingPlatform;
+  
+  system implementation ComputingPlatform.Config1
+    subcomponents
+      Processor1: processor HardwareParts::ARM.solo;
+      Processor2: processor HardwareParts::ARM.solo;
+      Processor3: processor HardwareParts::ARM.solo;
+      AHBBus: bus HardwareParts::AHB;
+    connections
+      AHBBus1: bus access AHBBus -> Processor1.ahb;
+      BusAccessConnection1: bus access AHBBus -> BusAccess1;
+  end ComputingPlatform.Config1;
+  
+  system implementation ComputingPlatform.Config2
+    subcomponents
+      Processor1: processor HardwareParts::ARM.dual;
+      Processor2: processor HardwareParts::ARM.dual;
+      Processor3: processor HardwareParts::ARM.dual;
+      AHBBus: bus HardwareParts::AHB;
+    connections
+      AHBBus1: bus access AHBBus -> Processor1.ahb;
+      BusAccessConnection1: bus access AHBBus -> BusAccess1;
+  end ComputingPlatform.Config2;
+  
+  system implementation ComputingPlatform.Config3
+    subcomponents
+      Processor1: processor HardwareParts::ARM.hybrid;
+      Processor2: processor HardwareParts::ARM.hybrid;
+      AHBBus: bus HardwareParts::AHB;
+    connections
+      AHBBus1: bus access AHBBus -> Processor1.ahb;
+      BusAccessConnection1: bus access AHBBus -> BusAccess1;
+  end ComputingPlatform.Config3;
+end HardwarePlatform;
