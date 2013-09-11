@@ -6,10 +6,10 @@ BTH course PA1410(EMSE, first year)
 This is the assignment for the course PA1410 - Software Architecture and Quality
 
 The team members are:
-	Aftri Marriska
-	Zakaria Mahmud
-	Santosh Shah
-	Adrian Vladu
+     Aftri Marriska, 
+     Zakaria Mahmud, 
+     Santosh Shah, 
+     Adrian Vladu.
   
 The assignment consists in solving architecture issues given a software system to be designed.
 It consists in creating factor tables, issue cards, and relevant strategies for solving the issues. 
